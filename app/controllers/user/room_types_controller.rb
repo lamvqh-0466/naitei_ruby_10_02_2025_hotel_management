@@ -3,8 +3,9 @@ class User::RoomTypesController < ApplicationController
     @q = RoomType.ransack(build_ransack_params)
     assign_room_types
     assign_reviews
-    assign_dates
-    assign_available_rooms
+    @date_valid = assign_dates
+    @available_rooms = {}
+    assign_available_rooms if @date_valid
   end
 
   def show
@@ -29,17 +30,50 @@ class User::RoomTypesController < ApplicationController
       limit: Settings.limit
     )
     @review = Review.new
+    @total_reviews_count = Review.count
     @average_score = @reviews.average(:score) || 0
     @star_counts = Review.group(:score).count
   end
 
   def assign_dates
-    if params[:checkin_date].present?
-      @checkin_date = Date.parse(params[:checkin_date])
+    unless params[:checkin_date].present? || params[:checkout_date].present?
+      return true
     end
-    return if params[:checkout_date].blank?
 
-    @checkout_date = Date.parse(params[:checkout_date])
+    parse_dates
+    return false if @date_error_message
+
+    validate_dates
+  end
+
+  def parse_dates
+    @checkin_date = parse_date(params[:checkin_date])
+    @checkout_date = parse_date(params[:checkout_date])
+  rescue ArgumentError
+    @date_error_message = t("errors.invalid_date_format")
+  end
+
+  def parse_date date_param
+    date_param.present? ? Date.parse(date_param) : nil
+  end
+
+  def validate_dates
+    unless @checkin_date && @checkout_date
+      @date_error_message = t("errors.dates_required")
+      return false
+    end
+
+    if @checkin_date < Time.zone.today
+      @date_error_message = t("errors.checkin_date_in_past")
+      return false
+    end
+
+    if @checkout_date <= @checkin_date
+      @date_error_message = t("errors.checkout_date_invalid")
+      return false
+    end
+
+    true
   end
 
   def assign_available_rooms

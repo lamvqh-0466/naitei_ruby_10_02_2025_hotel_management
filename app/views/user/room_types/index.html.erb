@@ -1,4 +1,9 @@
 <div class="date-selection">
+  <% if @date_error_message %>
+    <div class="error-message" style="color: red; margin-bottom: 10px;" role="alert">
+      <%= @date_error_message %>
+    </div>
+  <% end %>
   <div class="date-info">
     <span class="date-label"><%= t("date_selection.location") %></span>
     <span class="location"><%= t("hotel.name") %></span>
@@ -6,24 +11,26 @@
   <div class="date-info">
     <span class="date-label"><%= t("date_selection.checkin") %></span>
     <input type="date"
-       id="check-in-date"
-       name="checkin_date"
-       class="date-picker"
-       value="<%= params[:checkin_date] %>"
-       min="<%= Date.today.strftime('%Y-%m-%d') %>" />
+           id="check-in-date"
+           name="checkin_date"
+           class="date-picker"
+           value="<%= params[:checkin_date] %>"
+           min="<%= Date.today.strftime('%Y-%m-%d') %>"
+           required />
     <input type="time" id="check-in-time" class="time-picker" value="14:00" disabled />
   </div>
   <div class="date-info">
     <span class="date-label"><%= t("date_selection.checkout") %></span>
     <input type="date"
-       id="check-out-date"
-       name="checkout_date"
-       class="date-picker"
-       value="<%= params[:checkout_date] %>"
-         min="<%= Date.tomorrow.strftime('%Y-%m-%d') %>" />
+           id="check-out-date"
+           name="checkout_date"
+           class="date-picker"
+           value="<%= params[:checkout_date] %>"
+           min="<%= Date.tomorrow.strftime('%Y-%m-%d') %>"
+           required />
     <input type="time" id="check-out-time" class="time-picker" value="12:00" disabled />
   </div>
-  <%= link_to t("date_selection.apply"), "#", id: "apply-dates", class: "update-btn", data: { turbolinks: false } %>
+  <%= link_to t("date_selection.apply"), "#", id: "apply-dates", class: "update-btn", data: { turbo: false } %>
 </div>
 <div class="tab-menu">
   <ul>
@@ -50,8 +57,8 @@
         <div class="room-info">
           <p class="room-name"><%= room_type.name %></p>
           <%= link_to t("room_list.view_details"),
-            user_room_type_path(room_type),
-            class: "room-link text-blue-500" %>
+                      user_room_type_path(room_type),
+                      class: "room-link text-blue-500" %>
         </div>
         <div class="room-devices">
           <% room_type.devices.each do |device| %>
@@ -63,22 +70,22 @@
             <%= number_to_currency(room_type.price, unit: "", format: "%n đ") %>
             <span><%= t("room_list.per_day") %></span>
           </p>
-          <p class="room-available">
-            <%= t("room_list.available_quantity", count: @available_rooms[room_type.id]) %>
-          </p>
-          <% if @available_rooms[room_type.id] > 0 %>
-            <div class="room-booking">
-              <label for="quantity_<%= room_type.id %>">
-                <%= t("room_list.quantity") %>:
-              </label>
-              <input type="number"
-                     id="quantity_<%= room_type.id %>"
-                     name="quantity"
-                     min="1"
-                     max="<%= @available_rooms[room_type.id] %>"
-                     value="1" />
-              <% if can? :create, Request %>
-                <% if params[:checkin_date].present? && params[:checkout_date].present? %>
+          <% if @date_valid && @available_rooms[room_type.id] %>
+            <p class="room-available">
+              <%= t("room_list.available_quantity", count: @available_rooms[room_type.id]) %>
+            </p>
+            <% if @available_rooms[room_type.id] > 0 %>
+              <div class="room-booking">
+                <label for="quantity_<%= room_type.id %>">
+                  <%= t("room_list.quantity") %>:
+                </label>
+                <input type="number"
+                       id="quantity_<%= room_type.id %>"
+                       name="quantity"
+                       min="1"
+                       max="<%= @available_rooms[room_type.id] %>"
+                       value="1" />
+                <% if can? :create, Request %>
                   <%= link_to t("room_list.book_room"), "#",
                               class: "book-button",
                               data: {
@@ -87,14 +94,14 @@
                                 checkout: params[:checkout_date]
                               } %>
                 <% else %>
-                  <%= link_to t("room_list.book_room"), "#",
-                              class: "book-button disabled",
-                              data: { turbo: false } %>
+                  <%= link_to t("room_list.book_room"), new_user_session_path, class: "login-button", data: { turbo: false } %>
                 <% end %>
-              <% else %>
-                <%= link_to t("room_list.book_room"), new_user_session_path , class: "login-button", data: { turbo: false } %>
-              <% end %>
-            </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="room-available">
+              <%= t("room_list.no_rooms_available") %>
+            </p>
           <% end %>
         </div>
       </div>

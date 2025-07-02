@@ -1,5 +1,12 @@
 
 vi:
+  errors:
+    dates_required: "Vui lòng chọn cả ngày nhận phòng và trả phòng."
+    checkin_date_in_past: "Ngày nhận phòng không được trước ngày hiện tại."
+    checkout_date_invalid: "Ngày trả phòng phải sau ngày nhận phòng."
+    invalid_date_format: "Định dạng ngày không hợp lệ."
+    invalid_date_format: "Định dạng ngày không hợp lệ."
+    invalid_quantity: "Số lượng không hợp lệ. Phải lớn hơn 0."
   activerecord:
     models:
       user: "Người dùng"
@@ -418,3 +425,8 @@ devise:
     closing: "Trân trọng,"
     subject: "Báo cáo Doanh thu Hàng ngày cho tháng %{month}/%{year}"
     signature: "Nhóm Ứng dụng của bạn"
+  errors:
+    dates_required: "Vui lòng chọn cả ngày nhận phòng và trả phòng."
+    checkin_date_in_past: "Ngày nhận phòng không được trước ngày hiện tại."
+    checkout_date_invalid: "Ngày trả phòng phải sau ngày nhận phòng."
+    invalid_date_format: "Định dạng ngày không hợp lệ."

@@ -70,9 +70,11 @@ class User::RequestsController < ApplicationController
   def confirm
     if @request.token == params[:token] && @request.pending?
       @request.update(status: :deposited)
-      redirect_to user_request_path(@request, success: 1)
+
+      flash[:success] = t("payment.deposit_success")
+      redirect_to root_path
     else
-      flash[:danger] = t "confirm_denied"
+      flash[:danger] = t("confirm_denied")
       redirect_to user_requests_path
     end
   end
@@ -133,6 +135,11 @@ class User::RequestsController < ApplicationController
     end
 
     @quantity = (source[:quantity] || 1).to_i
+
+    return unless @quantity <= 0
+
+    flash[:danger] = t("errors.invalid_quantity")
+    redirect_to user_room_types_path and return
   end
 
   def calculate_total_price
